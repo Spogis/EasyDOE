@@ -3,8 +3,6 @@ import numpy as np
 import pyDOE2 as pyDOE
 from scipy.stats.distributions import norm
 
-NumberOfSimulations = 1000
-
 def estimate_std(max, min, trust_level):
     prop_trust_level = float(trust_level)
     z_critical = norm.ppf((1 + prop_trust_level) / 2)
@@ -38,7 +36,7 @@ def UpdateNaNValues(filename):
 
     df.to_excel('NewInputVariables.xlsx', index=False)
 
-def LatinHypercube():
+def LatinHypercube(NumberOfSimulations):
     df = pd.read_excel('NewInputVariables.xlsx')
     InputVariables = df['Variable Name']
     Variable_Mean = df['Mean']
@@ -55,7 +53,7 @@ def LatinHypercube():
         df_simulations[InputVariables[j]] = design[:, j]
 
     df_simulations.set_index('Simulation', inplace=True)
-    df_simulations.to_excel('DOE_LHC.xlsx')
+    df_simulations.to_excel('datasets/DOE_LHC.xlsx')
 
 
 def FullFactorial():
@@ -84,11 +82,10 @@ def FullFactorial():
 
     # Salva o DOE em um arquivo Excel
     doe_df.set_index('Simulation', inplace=True)
-    doe_df.to_excel('DOE_Full_Factorial.xlsx')
+    doe_df.to_excel('datasets/DOE_Full_Factorial.xlsx')
 
 
-def Run_DOE(filename):
+def Run_DOE(filename, NumberOfSimulations):
     UpdateNaNValues(filename)
-    LatinHypercube()
+    LatinHypercube(NumberOfSimulations)
     FullFactorial()
-
