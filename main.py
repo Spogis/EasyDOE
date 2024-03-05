@@ -89,16 +89,31 @@ app.layout = html.Div([
             },
         },
     ),
-
     html.Br(),
-    html.Button('Adicionar Linha', id='adding-rows-btn', n_clicks=0,
-                style={'backgroundColor': 'orange', 'color': 'white', 'fontWeight': 'bold', 'fontSize': '20px', 'marginRight': '10px'}),
 
-    html.Button('Salvar como Excel', id='save-excel-btn', n_clicks=0,
-                style={'backgroundColor': 'blue', 'color': 'white', 'fontWeight': 'bold', 'fontSize': '20px', 'marginRight': '10px'}),
+    html.Div([
+        html.Br(),
+        html.Button('Adicionar Linha', id='adding-rows-btn', n_clicks=0,
+                    style={'backgroundColor': 'orange', 'color': 'white', 'fontWeight': 'bold', 'fontSize': '20px', 'marginRight': '10px'}),
 
-    html.Button('Criar DOE', id='create-doe-btn', n_clicks=0,
-                style={'backgroundColor': 'green', 'color': 'white', 'fontWeight': 'bold', 'fontSize': '20px', 'marginRight': '10px'}),
+        html.Button('Salvar como Excel', id='save-excel-btn', n_clicks=0,
+                    style={'backgroundColor': 'blue', 'color': 'white', 'fontWeight': 'bold', 'fontSize': '20px', 'marginRight': '10px'}),
+
+        html.Button('Criar DOE', id='create-doe-btn', n_clicks=0,
+                    style={'backgroundColor': 'green', 'color': 'white', 'fontWeight': 'bold', 'fontSize': '20px', 'marginRight': '10px'}),
+    ], style={'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center', 'marginBottom': '10px'}),
+
+    html.Div([
+        html.Div("Número de Simulações:", style={'width': '200px', 'textAlign': 'center', 'marginRight': '10px', 'fontWeight': 'bold'}),
+        dcc.Input(
+            id="numero_de_simulacoes",
+            type='number',
+            value=1000,
+            disabled=False,
+            step=1,
+            style={'width': '150px', 'textAlign': 'center', 'fontWeight': 'bold'}
+        )
+    ], style={'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center', 'marginBottom': '10px'})
 
 ])
 
@@ -178,17 +193,18 @@ def save_excel(n_clicks, rows):
 @app.callback(
     Output('create-doe-btn', 'children'),
     [Input('create-doe-btn', 'n_clicks')],
-    [State('table', 'data')],
+    [State('table', 'data'),
+     State('numero_de_simulacoes', 'value')],
     prevent_initial_call=True
 )
-def create_doe(n_clicks, rows):
+def create_doe(n_clicks, rows, numero_de_simulacoes):
     if n_clicks > 0:
         df_to_save = pd.DataFrame(rows)
         filepath = 'datasets/DOE_Input.xlsx'
         df_to_save.to_excel(filepath, index=False)
 
         filepath = 'datasets/DOE_Input.xlsx'
-        NumberOfSimulations = 1000
+        NumberOfSimulations = numero_de_simulacoes
         Run_DOE(filepath, NumberOfSimulations)
         return 'Tabela DOE Gerada com sucesso!'
 
