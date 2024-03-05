@@ -79,7 +79,11 @@ def LatinHypercube(NumberOfSimulations):
     df['Segmentos'] = (df['Max'] - df['Min']) / df['Step (If Variable is Discrete)']
 
     NumberOfInputVariables = len(InputVariables)
-    design = pyDOE.lhs(NumberOfInputVariables, samples=NumberOfSimulations, criterion='correlation')
+    if NumberOfInputVariables == 1:
+        design = pyDOE.lhs(NumberOfInputVariables, samples=NumberOfSimulations)
+    else:
+        design = pyDOE.lhs(NumberOfInputVariables, samples=NumberOfSimulations, criterion='correlation')
+
     for i in range(NumberOfInputVariables):
         if Variable_Type[i] == 'Discrete':
             design[:, i] = norm(loc=Variable_Mean[i], scale=Variable_Standard_deviation[i]).ppf(design[:, i])

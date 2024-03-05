@@ -222,7 +222,7 @@ def add_row(n_clicks, rows):
 def save_excel(n_clicks, rows):
     if n_clicks > 0:
         df_to_save = pd.DataFrame(rows)
-        filepath = 'datasets/DOE_Input.xlsx'
+        filepath = 'Examples/DOE_Input.xlsx'
         df_to_save.to_excel(filepath, index=False)
         return 'Dados salvos com sucesso!'
     return 'Salvar como Excel'
