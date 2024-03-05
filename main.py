@@ -3,6 +3,7 @@ from dash import html, dcc, dash_table
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 import pandas as pd
+from datetime import datetime
 from dash.dash_table.Format import Format, Scheme
 import base64
 import io
@@ -24,10 +25,17 @@ df = pd.DataFrame({
 
 # Definição dos tipos de variáveis para o dropdown
 variable_types = ['Continuous', 'Discrete']
-trust_level_values = ['0.90', '0.95', '0.99', '0.9999']
+trust_level_values = ['0.90', '0.95', '0.99']
 
-# Inicializa o aplicativo Dash
-app = dash.Dash(__name__)
+# Inicializa o app Dash
+app = dash.Dash(__name__,
+                suppress_callback_exceptions=True,
+                external_stylesheets=[dbc.themes.BOOTSTRAP],
+                meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1.0"}],)
+
+app.title = "Easy DOE"
+
+server = app.server
 
 # Layout do aplicativo
 app.layout = html.Div([
@@ -41,11 +49,13 @@ app.layout = html.Div([
         children=html.Div(['Arraste ou ', html.A('Selecione um Arquivo')]),
         style={
             'width': '100%', 'height': '60px', 'lineHeight': '60px',
-            'borderWidth': '1px', 'borderStyle': 'dashed', 'borderRadius': '5px',
-            'textAlign': 'center', 'margin': '10px'
+            'borderWidth': '3px', 'borderStyle': 'dashed', 'borderRadius': '10px',
+            'textAlign': 'center'
         },
         multiple=False  # Permite a seleção de um único arquivo por vez
     ),
+    html.Br(),
+
     dash_table.DataTable(
         id='table',
         columns=[
@@ -108,6 +118,17 @@ app.layout = html.Div([
 
         html.Button('Criar DOE', id='create-doe-btn', n_clicks=0,
                     style={'backgroundColor': 'green', 'color': 'white', 'fontWeight': 'bold', 'fontSize': '20px', 'marginRight': '10px'}),
+
+    ], style={'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center', 'marginBottom': '10px'}),
+
+    html.Div([
+        dcc.Checklist(
+            id='generate-report',
+            options=[
+                {'label': 'Generate Report?', 'value': 'True', 'fontSize': '40px'}
+            ],
+            value=[],
+        )
     ], style={'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center', 'marginBottom': '10px'}),
 
     html.Div([
@@ -122,11 +143,9 @@ app.layout = html.Div([
         )
     ], style={'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center', 'marginBottom': '10px'}),
 
-    html.Div([
-        html.Br(),
-        dbc.Spinner(html.Div(id="loading-output"), color="dark", spinner_style={"width": "3rem", "height": "3rem"}),
-        html.Br(),
-    ], style={'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center', 'marginTop': '20px', 'marginBottom': '20px'}),
+    html.Br(),
+    dbc.Spinner(spinner_style={"width": "3rem", "height": "3rem"}, children=[html.Div(id="macro-output")]),
+    html.Br(),
 
     html.Div([
         html.Br(),
@@ -211,25 +230,31 @@ def save_excel(n_clicks, rows):
 
 @app.callback(
     [Output('create-doe-btn', 'children'),
-    Output('html-viewer', 'src'),
-    Output("loading-output", "children", allow_duplicate=True)],
+     Output('html-viewer', 'src'),
+     Output("macro-output", "children"),],
     Input('create-doe-btn', 'n_clicks'),
     [State('table', 'data'),
-     State('numero_de_simulacoes', 'value')],
-    prevent_initial_call=True
+     State('numero_de_simulacoes', 'value'),
+     State('generate-report', 'value'),],
+     prevent_initial_call=True
 )
-def create_doe(n_clicks, rows, numero_de_simulacoes):
+
+def create_doe(n_clicks, rows, numero_de_simulacoes, generate_report):
     df_to_save = pd.DataFrame(rows)
     filepath = 'datasets/DOE_Input.xlsx'
     df_to_save.to_excel(filepath, index=False)
 
     NumberOfSimulations = numero_de_simulacoes
     Run_DOE(filepath, NumberOfSimulations)
-    data_analytics()
-    Html_Page = "assets/relatorio_analise.html"
 
-    return 'Tabela DOE Gerada com sucesso!', Html_Page, None
+    if generate_report == ['True']:
+        data_analytics()
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        Html_Page = f"assets/relatorio_analise.html?update={timestamp}"
+    else:
+        Html_Page=""
 
+    return 'Tabela DOE Gerada com sucesso!', Html_Page, ""
 
 if __name__ == '__main__':
     app.run_server(host='127.0.0.2', port=8080, debug=False)

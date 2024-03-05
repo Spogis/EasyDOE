@@ -90,7 +90,6 @@ def LatinHypercube(NumberOfSimulations):
             values = scaler.fit_transform(array_2d )
             design[:, i] = values.flatten()
 
-
     # Criar o DataFrame
     df_simulations = pd.DataFrame({'Simulation': range(1, NumberOfSimulations + 1)})
 
