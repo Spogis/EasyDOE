@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import pyDOE2 as pyDOE
 from scipy.stats.distributions import norm
+from sklearn.preprocessing import MinMaxScaler
 
 def estimate_std(max, min, trust_level):
     prop_trust_level = float(trust_level)
@@ -40,7 +41,7 @@ def UpdateNaNValues(filename):
             if pd.isna(row['Standard Deviation']):
                 df.at[index, 'Standard Deviation'] = 1.0
 
-    df.to_excel('NewInputVariables.xlsx', index=False)
+    df.to_excel('DOE_APP/NewInputVariables.xlsx', index=False)
 
 
 def transforma_coluna(df, nome_coluna, val_min, val_max, num_segmentos):
@@ -66,18 +67,29 @@ def transforma_coluna(df, nome_coluna, val_min, val_max, num_segmentos):
     return df
 
 def LatinHypercube(NumberOfSimulations):
-    df = pd.read_excel('NewInputVariables.xlsx')
+    df = pd.read_excel('DOE_APP/NewInputVariables.xlsx')
     #df = df.loc[df['Variable Type'] != 'Discrete']
 
     InputVariables = df['Variable Name']
     Variable_Mean = df['Mean']
+    Variable_Max = df['Max']
+    Variable_Min = df['Min']
+    Variable_Type = df['Variable Type']
     Variable_Standard_deviation = df['Standard Deviation']
     df['Segmentos'] = (df['Max'] - df['Min']) / df['Step (If Variable is Discrete)']
 
     NumberOfInputVariables = len(InputVariables)
-    design = pyDOE.lhs(NumberOfInputVariables, samples=NumberOfSimulations, criterion='center')
+    design = pyDOE.lhs(NumberOfInputVariables, samples=NumberOfSimulations, criterion='correlation')
     for i in range(NumberOfInputVariables):
-        design[:, i] = norm(loc=Variable_Mean[i], scale=Variable_Standard_deviation[i]).ppf(design[:, i])
+        if Variable_Type[i] == 'Discrete':
+            design[:, i] = norm(loc=Variable_Mean[i], scale=Variable_Standard_deviation[i]).ppf(design[:, i])
+        else:
+            design[:, i] = norm(loc=Variable_Mean[i], scale=Variable_Standard_deviation[i]).ppf(design[:, i])
+            scaler = MinMaxScaler(feature_range=(Variable_Min[i], Variable_Max[i]))
+            array_2d = design[:, i].reshape(-1, 1)
+            values = scaler.fit_transform(array_2d )
+            design[:, i] = values.flatten()
+
 
     # Criar o DataFrame
     df_simulations = pd.DataFrame({'Simulation': range(1, NumberOfSimulations + 1)})
@@ -98,7 +110,7 @@ def LatinHypercube(NumberOfSimulations):
 
 
 def FullFactorial():
-    df = pd.read_excel('NewInputVariables.xlsx')
+    df = pd.read_excel('DOE_APP/NewInputVariables.xlsx')
     num_vars = len(df)
     # Gera o design full-factorial
     full_fact_design = pyDOE.ff2n(num_vars)

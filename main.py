@@ -24,7 +24,7 @@ df = pd.DataFrame({
 
 # Definição dos tipos de variáveis para o dropdown
 variable_types = ['Continuous', 'Discrete']
-trust_level_values = ['0.90', '0.95', '0.99']
+trust_level_values = ['0.90', '0.95', '0.99', '0.9999']
 
 # Inicializa o aplicativo Dash
 app = dash.Dash(__name__)
@@ -126,7 +126,7 @@ app.layout = html.Div([
         html.Br(),
         dbc.Spinner(html.Div(id="loading-output"), color="dark", spinner_style={"width": "3rem", "height": "3rem"}),
         html.Br(),
-    ], style={'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center', 'marginBottom': '10px'}),
+    ], style={'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center', 'marginTop': '20px', 'marginBottom': '20px'}),
 
     html.Div([
         html.Br(),
