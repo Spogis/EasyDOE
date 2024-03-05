@@ -1,12 +1,14 @@
 import dash
 from dash import html, dcc, dash_table
 from dash.dependencies import Input, Output, State
+import dash_bootstrap_components as dbc
 import pandas as pd
 from dash.dash_table.Format import Format, Scheme
 import base64
 import io
 
 from DOE_APP.DOE import *
+from DOE_APP.DataAnalysis import *
 
 # Inicializa os dados da tabela com as novas colunas e uma linha de exemplo
 df = pd.DataFrame({
@@ -29,6 +31,11 @@ app = dash.Dash(__name__)
 
 # Layout do aplicativo
 app.layout = html.Div([
+
+    html.Div([
+        html.Img(src='assets/logo.png', style={'height': '100px', 'margin-left': 'auto', 'margin-right': 'auto'}),
+    ], style={'text-align': 'center', 'margin-bottom': '10px'}),
+
     dcc.Upload(
         id='upload-data',
         children=html.Div(['Arraste ou ', html.A('Selecione um Arquivo')]),
@@ -113,7 +120,18 @@ app.layout = html.Div([
             step=1,
             style={'width': '150px', 'textAlign': 'center', 'fontWeight': 'bold'}
         )
-    ], style={'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center', 'marginBottom': '10px'})
+    ], style={'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center', 'marginBottom': '10px'}),
+
+    html.Div([
+        html.Br(),
+        dbc.Spinner(html.Div(id="loading-output"), color="dark", spinner_style={"width": "3rem", "height": "3rem"}),
+        html.Br(),
+    ], style={'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center', 'marginBottom': '10px'}),
+
+    html.Div([
+        html.Br(),
+        html.Iframe(id='html-viewer', src="", width='80%', height='600'),
+    ], style={'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center', 'marginBottom': '10px'}),
 
 ])
 
@@ -190,25 +208,28 @@ def save_excel(n_clicks, rows):
         return 'Dados salvos com sucesso!'
     return 'Salvar como Excel'
 
+
 @app.callback(
-    Output('create-doe-btn', 'children'),
-    [Input('create-doe-btn', 'n_clicks')],
+    [Output('create-doe-btn', 'children'),
+    Output('html-viewer', 'src'),
+    Output("loading-output", "children", allow_duplicate=True)],
+    Input('create-doe-btn', 'n_clicks'),
     [State('table', 'data'),
      State('numero_de_simulacoes', 'value')],
     prevent_initial_call=True
 )
 def create_doe(n_clicks, rows, numero_de_simulacoes):
-    if n_clicks > 0:
-        df_to_save = pd.DataFrame(rows)
-        filepath = 'datasets/DOE_Input.xlsx'
-        df_to_save.to_excel(filepath, index=False)
+    df_to_save = pd.DataFrame(rows)
+    filepath = 'datasets/DOE_Input.xlsx'
+    df_to_save.to_excel(filepath, index=False)
 
-        filepath = 'datasets/DOE_Input.xlsx'
-        NumberOfSimulations = numero_de_simulacoes
-        Run_DOE(filepath, NumberOfSimulations)
-        return 'Tabela DOE Gerada com sucesso!'
+    NumberOfSimulations = numero_de_simulacoes
+    Run_DOE(filepath, NumberOfSimulations)
+    data_analytics()
+    Html_Page = "assets/relatorio_analise.html"
 
-    return 'Criar DOE'
+    return 'Tabela DOE Gerada com sucesso!', Html_Page, None
+
 
 if __name__ == '__main__':
     app.run_server(host='127.0.0.2', port=8080, debug=False)
