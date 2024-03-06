@@ -82,9 +82,9 @@ def LatinHypercube(NumberOfSimulations):
 
     NumberOfInputVariables = len(InputVariables)
     if NumberOfInputVariables == 1:
-        design = pyDOE.lhs(NumberOfInputVariables, samples=NumberOfSimulations)
+        design = pyDOE.lhs(NumberOfInputVariables, samples=NumberOfSimulations, random_state=42)
     else:
-        design = pyDOE.lhs(NumberOfInputVariables, samples=NumberOfSimulations, criterion='correlation')
+        design = pyDOE.lhs(NumberOfInputVariables, samples=NumberOfSimulations, criterion='correlation', random_state=42)
 
     for i in range(NumberOfInputVariables):
         if Variable_Type[i] == 'Discrete':
