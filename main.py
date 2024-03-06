@@ -25,13 +25,14 @@ df = pd.DataFrame({
 
 # Definição dos tipos de variáveis para o dropdown
 variable_types = ['Continuous', 'Discrete']
-trust_level_values = ['0.90', '0.95', '0.99']
+trust_level_values = ['0.9', '0.95', '0.99']
 
 # Inicializa o app Dash
-app = dash.Dash(__name__,
-                suppress_callback_exceptions=True,
-                external_stylesheets=[dbc.themes.BOOTSTRAP],
-                meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1.0"}],)
+# app = dash.Dash(__name__,
+#                 suppress_callback_exceptions=True,
+#                 external_stylesheets=[dbc.themes.BOOTSTRAP],
+#                 meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1.0"}],)
+app = dash.Dash(__name__)
 
 app.title = "Easy DOE"
 
@@ -125,7 +126,7 @@ app.layout = html.Div([
         dcc.Checklist(
             id='generate-report',
             options=[
-                {'label': 'Gerar Report?', 'value': 'True', 'fontSize': '40px'}
+                {'label': 'Gerar Report?', 'value': 'True'}
             ],
             value=[],
         )

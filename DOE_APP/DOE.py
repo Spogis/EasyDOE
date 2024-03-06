@@ -104,8 +104,6 @@ def LatinHypercube(NumberOfSimulations):
 
     df_simulations.set_index('Simulation', inplace=True)
 
-    discrete_vars = df[df['Variable Type'] == 'Discrete']['Variable Name'].tolist()
-
     for index, row in df.iterrows():
         if row['Variable Type'] == 'Discrete':
             df_simulations = transforma_coluna(df_simulations, row['Variable Name'], row['Min'], row['Max'],
