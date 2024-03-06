@@ -4,6 +4,8 @@ import pyDOE2 as pyDOE
 from scipy.stats.distributions import norm
 from sklearn.preprocessing import MinMaxScaler
 
+np.random.seed(0)
+
 def estimate_std(max, min, trust_level):
     prop_trust_level = float(trust_level)
     z_critical = norm.ppf((1 + prop_trust_level) / 2)

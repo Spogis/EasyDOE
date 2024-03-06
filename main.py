@@ -125,7 +125,7 @@ app.layout = html.Div([
         dcc.Checklist(
             id='generate-report',
             options=[
-                {'label': 'Generate Report?', 'value': 'True', 'fontSize': '40px'}
+                {'label': 'Gerar Report?', 'value': 'True', 'fontSize': '40px'}
             ],
             value=[],
         )
@@ -166,24 +166,41 @@ def parse_contents(contents, filename):
         print(e)
         return None
 
-@app.callback(
-    Output('table', 'data', allow_duplicate=True),
-    [Input('upload-data', 'contents')],
-    [State('upload-data', 'filename')],
-    prevent_initial_call=True
-)
+@app.callback([Output('table', 'data', allow_duplicate=True),
+               Output('save-excel-btn', 'children', allow_duplicate=True),
+               Output('create-doe-btn', 'children', allow_duplicate=True)],
+              [Input('upload-data', 'contents')],
+              [State('upload-data', 'filename')],
+              prevent_initial_call=True
+              )
+
+
 def update_output(contents, filename):
     if contents is not None:
         rows = parse_contents(contents, filename)
         if rows is not None:
-            return rows
-    return dash.no_update
+            return rows, 'Salvar como Excel', 'Criar DOE'
+    return dash.no_update, 'Salvar como Excel', 'Criar DOE'
 
 
-@app.callback(
-    Output('table', 'style_data_conditional'),
-    [Input('table', 'data')]
-)
+@app.callback([Output('save-excel-btn', 'children', allow_duplicate=True),
+               Output('create-doe-btn', 'children', allow_duplicate=True)],
+              [Input('numero_de_simulacoes', 'value')],
+              prevent_initial_call=True)
+
+
+def NumSim(numero_de_simulacoes):
+    return 'Salvar como Excel', 'Criar DOE'
+
+
+@app.callback([Output('table', 'style_data_conditional', allow_duplicate=True),
+               Output('save-excel-btn', 'children', allow_duplicate=True),
+               Output('create-doe-btn', 'children', allow_duplicate=True)],
+              [Input('table', 'data')],
+              prevent_initial_call=True
+              )
+
+
 def update_editability(rows):
     # Verifica se alguma linha tem 'Variable Type' definido como 'Discrete'
     conditions = []
@@ -195,15 +212,17 @@ def update_editability(rows):
                 'border': '1px solid blue',
                 # Aqui você pode aplicar estilos adicionais se necessário
             })
-    return conditions
+    return conditions, 'Salvar como Excel', 'Criar DOE'
 
 
-@app.callback(
-    Output('table', 'data', allow_duplicate=True),
-    [Input('adding-rows-btn', 'n_clicks')],
-    [State('table', 'data')],
-    prevent_initial_call=True
+@app.callback([Output('table', 'data', allow_duplicate=True),
+               Output('save-excel-btn', 'children', allow_duplicate=True),
+               Output('create-doe-btn', 'children', allow_duplicate=True)],
+              Input('adding-rows-btn', 'n_clicks'),
+              [State('table', 'data')],
+              prevent_initial_call=True
 )
+
 def add_row(n_clicks, rows):
     if n_clicks > 0:
         rows.append({col: ('' if col not in ['Variable Name', 'Variable Type', 'Trust Level']
@@ -211,10 +230,10 @@ def add_row(n_clicks, rows):
                            else variable_types[0] if col == 'Variable Type'
                            else '')
                      for col in df.columns})
-    return rows
+    return rows, 'Salvar como Excel', 'Criar DOE'
 
 @app.callback(
-    Output('save-excel-btn', 'children'),
+    Output('save-excel-btn', 'children', allow_duplicate=True),
     [Input('save-excel-btn', 'n_clicks')],
     [State('table', 'data')],
     prevent_initial_call=True
@@ -229,9 +248,9 @@ def save_excel(n_clicks, rows):
 
 
 @app.callback(
-    [Output('create-doe-btn', 'children'),
-     Output('html-viewer', 'src'),
-     Output("macro-output", "children"),],
+    [Output('create-doe-btn', 'children', allow_duplicate=True),
+     Output('html-viewer', 'src', allow_duplicate=True),
+     Output("macro-output", "children", allow_duplicate=True),],
     Input('create-doe-btn', 'n_clicks'),
     [State('table', 'data'),
      State('numero_de_simulacoes', 'value'),
