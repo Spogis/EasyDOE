@@ -39,9 +39,9 @@ To run the application, follow these steps:
 
 * After running the command, Dash will start the local server and you can access the application through your browser. Normally, the URL will be something like `http://127.0.0.45:8080/`.
 
-## Example Datasets
+## Examples
 
-* In the [Datasets](https://github.com/Spogis/EasyDOE/tree/master/datasets) directory, you will find example datasets that can assist you.
+* In the [Examples](https://github.com/Spogis/EasyDOE/tree/master/Examples) directory, you will find example datasets that can assist you.
 
 ## Support
 
