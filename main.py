@@ -275,3 +275,5 @@ def create_doe(n_clicks, rows, numero_de_simulacoes, generate_report):
 if __name__ == '__main__':
     app.run_server(host='127.0.0.45', port=8080, debug=False)
 
+
+

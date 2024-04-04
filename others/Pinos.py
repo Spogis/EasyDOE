@@ -5,8 +5,8 @@ import seaborn as sns
 from scipy.stats import norm
 
 # Definindo os parâmetros das distribuições normais
-media_furo, dp_furo = 100.0, 5.0
-media_pino, dp_pino = 40.0, 4.0
+media_furo, dp_furo = 50.0, 1.0
+media_pino, dp_pino = 40.0, 1.0
 
 
 def probabilidade_pino_nao_entrar(media_furo, dp_furo, media_pino, dp_pino):
@@ -26,19 +26,34 @@ df.to_excel(caminho_arquivo, index=False)
 
 probabilidade = probabilidade_pino_nao_entrar(media_furo, dp_furo, media_pino, dp_pino)
 
-# Plotando as distribuições
-plt.figure(figsize=(10, 6))
-sns.histplot(dados1, bins=30, kde=True, color='blue', label='Furos - Média ' + str(media_furo) + ', Desvio Padrão ' + str(dp_furo))
-sns.histplot(dados2, bins=30, kde=True, color='red', label='Pinos - Média ' + str(media_pino) + ', Desvio Padrão ' + str(dp_pino))
-plt.title('Distribuição Normal para Dois Casos')
-plt.xlabel('Valor')
-plt.ylabel('Frequência')
-plt.legend()
+fig, ax = plt.subplots(figsize=(10, 6))
+fig.patch.set_facecolor('#00FF00')
+ax.set_facecolor('#00FF00')
 
-# Ajusta o layout para criar espaço adicional abaixo do gráfico
-plt.subplots_adjust(bottom=0.2)
-plt.figtext(0.5, 0.05, s=f'Probabilidade do pino não entrar no furo: {probabilidade:.2f}%', fontsize=12, color='green', ha='center',
-            bbox={'facecolor': 'white', 'alpha': 0.2})
+ax = sns.histplot(data=dados1, bins=30, kde=False, stat='density', color='#ff1493',
+                  label=f'Furos - Média {media_furo}, Desvio Padrão {dp_furo}')
+sns.kdeplot(data=dados1, color='crimson', ax=ax)
+
+ax = sns.histplot(data=dados2, bins=30, kde=False, stat='density', color='#ff0000',
+                  label=f'Pinos - Média {media_pino}, Desvio Padrão {dp_pino}')
+sns.kdeplot(data=dados2, color='crimson', ax=ax)
+
+ax.set_title(f'Probabilidade do pino não entrar no furo: {probabilidade:.2f}%', color='#ffffff', fontsize=20)
+ax.set_xlabel('Diâmetro', color='#ffffff', fontsize='large')
+ax.set_ylabel('Frequência', color='#ffffff', fontsize='large')
+ax.tick_params(axis='x', colors='#ffffff', labelsize='large')
+ax.tick_params(axis='y', colors='#ffffff', labelsize='large')
+
+ax.legend(facecolor='#00FF00')
+legend = ax.legend(fontsize='large', loc='upper right'
+                   , facecolor='#000000')
+for text in legend.get_texts():
+    text.set_color('#ffffff')
+
+for spine in ax.spines.values():
+    spine.set_edgecolor('#ffffff')
 
 plt.show()
+
+
 
