@@ -8,8 +8,8 @@ from dash.dash_table.Format import Format, Scheme
 import base64
 import io
 
-from DOE_APP.DOE import *
-from DOE_APP.DataAnalysis import *
+from doe.DOE import *
+from doe.DataAnalysis import *
 
 # Inicializa os dados da tabela com as novas colunas e uma linha de exemplo
 df = pd.DataFrame({
